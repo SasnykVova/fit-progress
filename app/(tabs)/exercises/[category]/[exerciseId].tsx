@@ -1,7 +1,8 @@
 import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { View, Text, StyleSheet, Button, Modal, TextInput } from "react-native";
-
+import { View, Text, StyleSheet, Button, Modal, TextInput, TouchableOpacity } from "react-native";
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 
 export default function ExerciseScreen() {
@@ -16,13 +17,16 @@ export default function ExerciseScreen() {
     { id: '2', set: '2', weight: '10', reps: '12' },
   ]);
 
-  const handleAddExercise = () => {
+  const handleAddSet= () => {
     const idAndSet = (setsData.length + 1).toString();
     setSetsData(prev => [...prev, {id: idAndSet, set: idAndSet, weight: weight ?? '0', reps: reps ?? '0'}]);
     setModalIsOpen(false);
     setReps('');
     setWeight('');
   };
+
+  const handleEditSet = () => {}
+  const handleDeleteSet = () => {}
 
   return (
     <View>
@@ -40,6 +44,8 @@ export default function ExerciseScreen() {
             </Text>
             <Text>Вага {weight}</Text>
             <Text>Повторень {reps}</Text>
+            <TouchableOpacity onPress={handleEditSet}><FontAwesome6 name="edit" size={24} color="black" /></TouchableOpacity>
+            <TouchableOpacity onPress={handleDeleteSet}><MaterialIcons name="delete" size={24} color="black" /></TouchableOpacity>
           </View>
         ))}
       </View>
@@ -75,7 +81,7 @@ export default function ExerciseScreen() {
                 color="red"
                 onPress={() => setModalIsOpen(false)}
               />
-              <Button title="Додати" onPress={handleAddExercise} />
+              <Button title="Додати" onPress={handleAddSet} />
             </View>
           </View>
         </View>

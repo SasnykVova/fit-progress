@@ -7,51 +7,80 @@ import {
     Button,
     Pressable,
     Modal,
+    ActivityIndicator,
   } from "react-native";
-  import React, { useState } from "react";
-import { groupData } from '..';
+  import React, { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
+import { useAppDispatch } from '../../../../hooks/useAppDispatch';
+import { useAppSelector } from '../../../../hooks/useAppSelector';
+import { fetchMuscleGroupById } from '../../../../services/muscleGroupsSlice';
+import { actions, fetchUserExercises, setExercises } from '../../../../services/exercisesSlice';
+import { auth } from '../../../../firebase/firebaseConfig';
   
   export default function handsGroup() {
 
     const { category } = useLocalSearchParams();
+
     const router = useRouter();
+    const dispatch = useAppDispatch();
+    const {data, loading, success, error} = useAppSelector(state => state.muscleGroup.getMuscleGroupById);
+    const userId = auth.currentUser?.uid;
 
-    const filterData = groupData.filter(c => c.id === Number(category));
-    const { id, name } = filterData[0]
+    const { data: exercisesData, loading: exLoading} = useAppSelector(state => state.exercises.getExercises);
+    const { name, modalOpen, success: addExSuccess } = useAppSelector(state => state.exercises.setExercises);
+    
+    const exercisesDataSort = exercisesData.filter(e => e?.groupId?.id === category);
+  
+ 
+      useEffect(() => {
+        dispatch(fetchMuscleGroupById(category))
+      }, [])
+      useEffect(() => {
+        dispatch(fetchUserExercises(userId))
+      }, [])
 
-    const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
-    const [exerciseName, setExerciseName] = useState<string>("");
+      useEffect(() => {
+        if(addExSuccess) {
+          dispatch(fetchUserExercises(userId))
+          dispatch(actions.setExSuccessFalse())
+        }
+      }, [addExSuccess])
+
+
     const [search, setSearch] = useState<string>("");
-    const [exercisesData, setExercisesData] = useState([
-      {id: 1, name: "Підйом на біцепс"},
-      {id: 2, name: "Підйом на біцепс на лавці скота"},
-    ]);
+
   
     const handleAddExercise = () => {
-      if (exerciseName.trim()) {
-        setExercisesData((prev) => [...prev, {id: 3, name: exerciseName}]);
-        setExerciseName("");
-        setModalIsOpen(false);
-      }
+      const data = {userId: userId,name: name,groupId: category}
+      dispatch(setExercises(data));
     };
+
+    if(loading) {
+      return (
+        <View style={styles.indicatorContainer}>
+          <ActivityIndicator size="large"/>
+        </View>
+      )
+    }
   
     return (
       <View style={styles.container}>
-        <Text style={styles.h2}>{name}</Text>
+        <Text style={styles.h2}>{data.name}</Text>
   
         <View style={styles.btnInputBlock}>
           <TextInput
             style={styles.input}
             placeholder="Search exercises..."
             value={search}
-            onChangeText={setSearch}
+            onChangeText={(text) => setSearch(text)}
           />
-          <Button title={"Добавити вправу"} onPress={() => setModalIsOpen(true)}></Button>
+          <Button title={"Добавити вправу"} onPress={() => dispatch(actions.setModalOpen(true))}></Button>
         </View>
   
         <View style={styles.exercisesBlock}>
-          {exercisesData.map((e) => (
+          {exLoading ? <ActivityIndicator size="large" />
+          :
+          exercisesDataSort?.map((e) => (
             <Pressable key={e.id} style={styles.exercisesContainer} onPress={() => router.push(`/exercises/${category}/${e.id}`)}>
               <Text>{e.name}</Text>
             </Pressable>
@@ -61,16 +90,16 @@ import { useRouter } from "expo-router";
         <Modal
           animationType="slide"
           transparent={true}
-          visible={modalIsOpen}
-          onRequestClose={() => setModalIsOpen(false)}
+          visible={modalOpen}
+          onRequestClose={() => dispatch(actions.setModalOpen(false))}
         >
           <View style={styles.modalWrapper}>
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>Нова вправа</Text>
               <TextInput
                 placeholder="Назва вправи"
-                value={exerciseName}
-                onChangeText={setExerciseName}
+                value={name}
+                onChangeText={(text) => dispatch(actions.setExercisesName(text))}
                 style={styles.inputInsideModal}
               />
   
@@ -78,7 +107,7 @@ import { useRouter } from "expo-router";
                 <Button
                   title="Відмінити"
                   color="red"
-                  onPress={() => setModalIsOpen(false)}
+                  onPress={() => dispatch(actions.setModalOpen(false))}
                 />
                 <Button title="Додати" onPress={handleAddExercise} />
               </View>
@@ -152,5 +181,11 @@ import { useRouter } from "expo-router";
       flexDirection: 'row',
       justifyContent: 'space-between',
     },
+    indicatorContainer: {
+      flex: 1,
+      display:'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+    }
   });
   

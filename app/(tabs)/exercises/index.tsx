@@ -1,29 +1,32 @@
 import { View, Text, StyleSheet, Pressable } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "expo-router";
+import { useAppDispatch } from "../../../hooks/useAppDispatch";
+import { fetchMuscleGroups } from "../../../services/muscleGroupsSlice";
+import { useAppSelector } from "../../../hooks/useAppSelector";
 
-export const groupData = [
-  { id: 1, name: "Руки"},
-  { id: 2, name: "Ноги"},
-  { id: 3, name: "Тіло (передня частина)"},
-  { id: 4, name: "Тіло (задня частина)"},
-  { id: 5, name: "Кардіо"},
-  { id: 6, name: "Інші"},
-];
+
 
 export default function Exercises() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  const {data, loading, success, error} = useAppSelector(state => state.muscleGroup.getMuscleGroups);
+
+
+  useEffect(() => {
+    dispatch(fetchMuscleGroups())
+  }, [])
 
   return (
     <View style={styles.container}>
       <View style={styles.muscleGroupsWrapper}>
-        {groupData.map(({ id, name }) => (
+        {data?.map((g) => (
           <Pressable
-            key={id}
-            onPress={() => router.push(`/exercises/${id}`)}
+            key={g.id}
+            onPress={() => router.push(`/exercises/${g.id}`)}
             style={styles.muscleGroupWrapper}
           >
-            <Text style={styles.muscleGroupText}>{name}</Text>
+            <Text style={styles.muscleGroupText}>{g.name}</Text>
           </Pressable>
         ))}
       </View>

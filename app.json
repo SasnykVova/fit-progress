@@ -23,6 +23,15 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "FIREBASE_API_KEY":"AIzaSyCuaVdp87OVQAbYAqiIsOqAmnasLSRIPYY",
+      "FIREBASE_AUTH_DOMAIN":"fit-progress-back-end.firebaseapp.com",
+      "FIREBASE_PROJECT_ID":"fit-progress-back-end",
+      "FIREBASE_STORAGE_BUCKET":"fit-progress-back-end.firebasestorage.app",
+      "FIREBASE_MESSAGING_SENDER_ID":"597929735742",
+      "FIREBASE_APP_ID":"1:597929735742:web:1422978f6193cdc552036f",
+      "FIREBASE_MEASUREMENT_ID":"G-SC1SYP4HX6"
     }
   }
 }
